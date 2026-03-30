@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import PlanViewer from "@/components/PlanViewer";
+import PlanChat from "@/components/PlanChat";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/generate-plan`;
 
@@ -154,6 +155,12 @@ export default function PlannerPage() {
                 setPlan(null);
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
+            />
+
+            {/* Chat for plan refinement */}
+            <PlanChat
+              plan={plan}
+              onPlanUpdate={(updatedPlan) => setPlan(updatedPlan)}
             />
 
             {/* New plan button */}
