@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import PlanViewer from "@/components/PlanViewer";
 import PlanChat from "@/components/PlanChat";
+import type { PlanChatRef } from "@/components/PlanChat";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/generate-plan`;
 
@@ -18,6 +19,9 @@ export default function PlannerPage() {
     input_tokens: number;
     output_tokens: number;
   } | null>(null);
+
+  // Ref to PlanChat — allows sending messages programmatically (e.g., from upgrade clicks)
+  const chatRef = useRef<PlanChatRef>(null);
 
   const handleGenerate = async () => {
     if (!description.trim()) return;
@@ -148,20 +152,38 @@ export default function PlannerPage() {
 
         {plan && (
           <div>
-            <PlanViewer
-              plan={plan}
-              onUpgradeClick={(upgrade) => {
-                setDescription(description.trim() + " + " + upgrade);
-                setPlan(null);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            />
+            <PlanViewer plan={plan} />
 
             {/* Chat for plan refinement */}
             <PlanChat
+              ref={chatRef}
               plan={plan}
               onPlanUpdate={(updatedPlan) => setPlan(updatedPlan)}
             />
+
+            {/* Future upgrades — click sends message to chat */}
+            {plan.next_upgrades?.length > 0 && (
+              <div className="mt-6 bg-white dark:bg-stone-800 border border-gray-100 dark:border-stone-700 rounded-lg p-4">
+                <h3 className="text-xs font-semibold text-brand-secondary dark:text-stone-400 uppercase tracking-wide mb-2">
+                  Future upgrades
+                </h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {plan.next_upgrades.map((u: string, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => chatRef.current?.sendMessage(`Add this upgrade: ${u}`)}
+                      className="text-xs text-brand-secondary bg-gray-50 dark:bg-stone-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-brand-accent px-2.5 py-1 rounded-full transition-colors cursor-pointer text-left"
+                      title="Click to refine plan with this upgrade"
+                    >
+                      {u} →
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-brand-tertiary dark:text-stone-500 mt-2">
+                  Click any upgrade to add it to your plan via chat
+                </p>
+              </div>
+            )}
 
             {/* New plan button */}
             <div className="mt-8 pt-4 border-t border-gray-100 dark:border-stone-800 text-center">

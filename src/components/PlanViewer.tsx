@@ -93,7 +93,7 @@ function DifficultyBadge({ level }: { level: string }) {
   );
 }
 
-export default function PlanViewer({ plan, onUpgradeClick }: { plan: Plan; onUpgradeClick?: (upgrade: string) => void }) {
+export default function PlanViewer({ plan }: { plan: Plan }) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("overview");
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
@@ -225,28 +225,6 @@ export default function PlanViewer({ plan, onUpgradeClick }: { plan: Plan; onUpg
               ))}
             </div>
           )}
-
-          {/* Upgrades — clickable to generate new plan */}
-          <div className="bg-white dark:bg-stone-800 border border-gray-100 dark:border-stone-700 rounded-lg p-4">
-            <h3 className="text-xs font-semibold text-brand-secondary dark:text-stone-400 uppercase tracking-wide mb-2">
-              Future upgrades
-            </h3>
-            <div className="flex flex-wrap gap-1.5">
-              {plan.next_upgrades.map((u, i) => (
-                <button
-                  key={i}
-                  onClick={() => onUpgradeClick?.(u)}
-                  className="text-xs text-brand-secondary bg-gray-50 dark:bg-stone-700 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-brand-accent px-2.5 py-1 rounded-full transition-colors cursor-pointer text-left"
-                  title="Click to generate this upgrade"
-                >
-                  {u} →
-                </button>
-              ))}
-            </div>
-            {onUpgradeClick && (
-              <p className="text-[11px] text-brand-tertiary dark:text-stone-500 mt-2">Click any upgrade to generate a new plan with it included</p>
-            )}
-          </div>
         </div>
       )}
 

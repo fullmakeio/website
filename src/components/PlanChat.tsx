@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 
 // ============================================
 // PlanChat — Chat interface for plan refinement
@@ -21,10 +21,15 @@ interface PlanChatProps {
   onPlanUpdate: (plan: any) => void; // Callback when plan is refined
 }
 
+// Methods exposed to parent via ref
+export interface PlanChatRef {
+  sendMessage: (text: string) => void;
+}
+
 // Base API URL — same env variable as generate-plan
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export default function PlanChat({ plan, onPlanUpdate }: PlanChatProps) {
+const PlanChat = forwardRef<PlanChatRef, PlanChatProps>(({ plan, onPlanUpdate }, ref) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,8 +52,8 @@ export default function PlanChat({ plan, onPlanUpdate }: PlanChatProps) {
     }));
   };
 
-  const handleSend = async () => {
-    const text = input.trim();
+  // Core send logic — used by both input field and external sendMessage
+  const doSend = async (text: string) => {
     if (!text || loading) return;
 
     // Add user message to chat
@@ -109,6 +114,18 @@ export default function PlanChat({ plan, onPlanUpdate }: PlanChatProps) {
       inputRef.current?.focus();
     }
   };
+
+  const handleSend = async () => {
+    const text = input.trim();
+    await doSend(text);
+  };
+
+  // Expose sendMessage to parent (for Future Upgrades clicks)
+  useImperativeHandle(ref, () => ({
+    sendMessage: (text: string) => {
+      doSend(text);
+    },
+  }));
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -232,4 +249,7 @@ export default function PlanChat({ plan, onPlanUpdate }: PlanChatProps) {
       )}
     </div>
   );
-}
+});
+
+PlanChat.displayName = "PlanChat";
+export default PlanChat;
