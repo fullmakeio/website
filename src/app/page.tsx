@@ -2,129 +2,24 @@
 
 // ============================================
 // FULLMAKE — Landing Page (Next.js)
-// Converted from landing-v3.html
-// 4 scroll panels: Hero, Features, How it works, Waitlist
-// Crossfade scroll engine with nav dots
-// Dark mode via CSS variables (prefers-color-scheme)
+// Split layout: Left (brand + waitlist) / Right (interactive preview)
+// Single viewport, no scrolling needed.
+// Krem light mode (#F5F1EB) + warm dark mode (#1E1B18)
 // ============================================
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-
-// Metadata is handled in layout.tsx for App Router.
-// If you need page-specific metadata, export a metadata object
-// from a separate metadata.ts file or use generateMetadata().
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [formState, setFormState] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [formMessage, setFormMessage] = useState("");
-  const [activePanel, setActivePanel] = useState(0);
-  const panelsRef = useRef<(HTMLElement | null)[]>([]);
-  const dotsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  const footerRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
-  const PANEL_COUNT = 4;
-  const ZONE_HEIGHT_VH = 120;
-
-  // =============================================
-  // SCROLL CROSSFADE ENGINE
-  // Panels are position:fixed, stacked on top of each other.
-  // Scroll position maps to panel transitions.
-  // Each "zone" = one transition between panels.
-  // Within a zone: outgoing fades 1→0, incoming fades 0→1.
-  // =============================================
-  useEffect(() => {
-    function updatePanels() {
-      const scrollY = window.scrollY;
-      const vh = window.innerHeight;
-      const zoneHeight = (vh * ZONE_HEIGHT_VH) / 100;
-      const totalHeight = zoneHeight * (PANEL_COUNT - 1);
-
-      const progress = Math.min(scrollY / totalHeight, 1);
-      const rawIndex = progress * (PANEL_COUNT - 1);
-      const currentIndex = Math.floor(rawIndex);
-      const blend = rawIndex - currentIndex;
-
-      let newActiveIndex = currentIndex;
-
-      panelsRef.current.forEach((panel, i) => {
-        if (!panel) return;
-
-        let opacity = 0;
-        let translateY = 20;
-
-        if (i === currentIndex && i < PANEL_COUNT - 1) {
-          // Outgoing panel — fade from 1 to 0
-          opacity = 1 - blend;
-          translateY = -20 * blend;
-        } else if (i === currentIndex + 1) {
-          // Incoming panel — fade from 0 to 1
-          opacity = blend;
-          translateY = 20 * (1 - blend);
-          if (blend > 0.5) newActiveIndex = i;
-        } else if (i === currentIndex && i === PANEL_COUNT - 1) {
-          // Last panel, fully visible
-          opacity = 1;
-          translateY = 0;
-        }
-
-        opacity = Math.max(0, Math.min(1, opacity));
-        panel.style.opacity = String(opacity);
-        panel.style.zIndex = i === newActiveIndex || i === currentIndex ? "2" : "1";
-        panel.style.pointerEvents = opacity > 0.5 ? "auto" : "none";
-
-        const inner = panel.querySelector(".panel-inner") as HTMLElement;
-        if (inner) {
-          inner.style.transform = `translateY(${translateY}px)`;
-        }
-      });
-
-      setActivePanel(newActiveIndex);
-
-      // Footer visibility on last panel
-      if (footerRef.current) {
-        const lastOpacity = parseFloat(panelsRef.current[PANEL_COUNT - 1]?.style.opacity || "0");
-        footerRef.current.style.opacity = lastOpacity > 0.8 ? "1" : "0";
-      }
-    }
-
-    window.addEventListener("scroll", updatePanels, { passive: true });
-    updatePanels(); // Initial state
-
-    // Keyboard navigation
-    function handleKeydown(e: KeyboardEvent) {
-      const vh = window.innerHeight;
-      const zoneHeight = (vh * ZONE_HEIGHT_VH) / 100;
-      const current = Math.round(window.scrollY / zoneHeight);
-
-      if (e.key === "ArrowDown" || e.key === "PageDown") {
-        e.preventDefault();
-        if (current < PANEL_COUNT - 1) goToPanel(current + 1);
-      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
-        e.preventDefault();
-        if (current > 0) goToPanel(current - 1);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      window.removeEventListener("scroll", updatePanels);
-      document.removeEventListener("keydown", handleKeydown);
-    };
-  }, []);
-
-  // Navigate to a specific panel by scrolling to its zone
-  function goToPanel(index: number) {
-    const vh = window.innerHeight;
-    const zoneHeight = (vh * ZONE_HEIGHT_VH) / 100;
-    window.scrollTo({ top: index * zoneHeight, behavior: "smooth" });
-  }
+  const tabs = ["Overview", "Components", "Wiring", "Code"];
 
   // =============================================
   // WAITLIST FORM SUBMISSION
-  // Calls the real backend API endpoint
   // =============================================
   async function handleSubmit() {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -162,154 +57,110 @@ export default function LandingPage() {
 
   return (
     <>
-      {/* =============================================
-          EMBEDDED STYLES
-          CSS variables handle light/dark mode automatically.
-          Custom styles for scroll engine, panels, and components.
-          ============================================= */}
       <style>{`
+        /* =============================================
+           COLOR SYSTEM
+           Light: warm krem (#F5F1EB)
+           Dark: warm brown-black (#1E1B18)
+           ============================================= */
         :root {
-          --bg: #FAFAF9;
+          --bg: #F5F1EB;
           --bg-surface: #FFFFFF;
+          --bg-surface-hover: #FAF9F7;
           --text-primary: #1C1917;
           --text-secondary: #78716C;
           --text-tertiary: #A8A29E;
           --accent: #D97706;
           --accent-hover: #B45309;
-          --accent-light: #FEF3C7;
-          --accent-glow: rgba(217, 119, 6, 0.08);
+          --accent-light: rgba(217, 119, 6, 0.1);
           --border: rgba(28, 25, 23, 0.08);
-          --border-strong: rgba(28, 25, 23, 0.12);
+          --border-strong: rgba(28, 25, 23, 0.14);
           --slash-top: rgba(217, 119, 6, 1);
           --slash-bottom: rgba(217, 119, 6, 0.08);
           --success: #16A34A;
           --error: #DC2626;
           --code-bg: #292524;
-          --code-text: #FAFAF9;
+          --code-text: #D6D3D1;
+          --code-keyword: #F59E0B;
+          --code-string: #6EE7B7;
+          --code-comment: #78716C;
+          --card-shadow: 0 1px 3px rgba(28, 25, 23, 0.06), 0 8px 24px rgba(28, 25, 23, 0.04);
+          --coming-bg: rgba(28, 25, 23, 0.05);
+          --coming-text: #A8A29E;
         }
 
         @media (prefers-color-scheme: dark) {
           :root {
-            --bg: #1C1917;
-            --bg-surface: #292524;
-            --text-primary: #FAFAF9;
+            --bg: #1E1B18;
+            --bg-surface: #2A2622;
+            --bg-surface-hover: #33302B;
+            --text-primary: #F5F1EB;
             --text-secondary: #A8A29E;
             --text-tertiary: #78716C;
             --accent: #F59E0B;
             --accent-hover: #D97706;
-            --accent-light: rgba(245, 158, 11, 0.1);
-            --accent-glow: rgba(245, 158, 11, 0.06);
-            --border: rgba(250, 250, 249, 0.08);
-            --border-strong: rgba(250, 250, 249, 0.12);
+            --accent-light: rgba(245, 158, 11, 0.12);
+            --border: rgba(245, 241, 235, 0.08);
+            --border-strong: rgba(245, 241, 235, 0.14);
             --slash-top: rgba(245, 158, 11, 1);
             --slash-bottom: rgba(245, 158, 11, 0.08);
-            --code-bg: #1C1917;
-            --code-text: #F59E0B;
+            --code-bg: #171411;
+            --code-text: #D6D3D1;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15);
+            --coming-bg: rgba(245, 241, 235, 0.06);
+            --coming-text: #78716C;
           }
         }
 
-        /* Reset — scoped to landing page */
+        /* =============================================
+           BASE
+           ============================================= */
         .landing-root {
-          font-family: 'DM Sans', system-ui, sans-serif;
-          background-color: var(--bg);
+          font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+          background: var(--bg);
           color: var(--text-primary);
-          line-height: 1.6;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
           -webkit-font-smoothing: antialiased;
         }
 
-        /* Scroll spacer — creates scrollable height for crossfade engine */
-        .scroll-spacer {
-          height: 500vh;
-          position: relative;
-        }
-
-        /* Fixed panels — stacked, opacity controlled by scroll engine */
-        .panel {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100vh;
+        /* =============================================
+           MAIN LAYOUT — split left/right
+           ============================================= */
+        .landing-main {
+          flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 2rem 1.5rem;
-          opacity: 0;
-          pointer-events: none;
-          background: var(--bg);
-          z-index: 1;
-        }
-
-        .panel-inner {
-          max-width: 720px;
+          padding: 2rem;
+          gap: 4rem;
+          max-width: 1120px;
+          margin: 0 auto;
           width: 100%;
-          transform: translateY(20px);
-          transition: transform 0.1s linear;
         }
 
-        /* Nav dots — fixed right side */
-        .nav-dots {
-          position: fixed;
-          right: 1.25rem;
-          top: 50%;
-          transform: translateY(-50%);
+        .landing-left {
+          flex: 1;
+          max-width: 420px;
+        }
+
+        .landing-right {
+          flex: 1;
+          max-width: 400px;
           display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-          z-index: 100;
+          align-items: center;
+          justify-content: center;
         }
 
-        .nav-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--text-tertiary);
-          border: none;
-          cursor: pointer;
-          transition: background 0.3s, transform 0.3s;
-          padding: 0;
-        }
-
-        .nav-dot:hover {
-          background: var(--text-secondary);
-          transform: scale(1.3);
-        }
-
-        .nav-dot.active {
-          background: var(--accent);
-          transform: scale(1.3);
-        }
-
-        @media (max-width: 640px) {
-          .nav-dots { right: 0.6rem; gap: 0.6rem; }
-          .nav-dot { width: 6px; height: 6px; }
-        }
-
-        /* Hero panel */
-        .hero-panel { text-align: center; z-index: 2; }
-
-        .hero-panel::before {
-          content: '';
-          position: absolute;
-          top: 40%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 600px;
-          height: 400px;
-          background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
-          pointer-events: none;
-        }
-
-        .hero-panel .panel-inner {
-          position: relative;
-          z-index: 1;
-        }
-
+        /* =============================================
+           LOGO — full/make wordmark with animated slash
+           ============================================= */
         .logo-landing {
           display: inline-block;
-          width: min(340px, 75vw);
+          width: min(280px, 70vw);
           height: auto;
-          margin-bottom: 2rem;
+          margin-bottom: 1.25rem;
         }
 
         .logo-text { fill: var(--text-primary); }
@@ -317,361 +168,407 @@ export default function LandingPage() {
         .logo-slash {
           stroke-dasharray: 60;
           stroke-dashoffset: 60;
-          animation: slash-draw 0.8s ease-out 0.4s forwards;
+          animation: slash-draw 0.8s ease-out 0.3s forwards;
         }
 
+        @keyframes slash-draw {
+          to { stroke-dashoffset: 0; }
+        }
+
+        /* =============================================
+           LEFT SIDE — tagline, description, form
+           ============================================= */
         .hero-tagline {
-          font-size: clamp(1.1rem, 3vw, 1.4rem);
+          font-size: clamp(1.05rem, 2.5vw, 1.25rem);
           font-weight: 400;
           color: var(--text-secondary);
           letter-spacing: 0.01em;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
         }
 
         .hero-description {
-          font-size: clamp(0.9rem, 2.2vw, 1rem);
-          color: var(--text-secondary);
-          max-width: 420px;
-          margin: 0 auto 2rem;
-          line-height: 1.6;
-        }
-
-        /* Hero dual CTA */
-        .hero-cta {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .btn-primary {
-          font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.95rem;
-          font-weight: 600;
-          color: #FFFFFF;
-          background: var(--accent);
-          border: none;
-          border-radius: 8px;
-          padding: 0.8rem 2rem;
-          cursor: pointer;
-          transition: background 0.2s;
-          white-space: nowrap;
-          text-decoration: none;
-          display: inline-block;
-        }
-
-        .btn-primary:hover { background: var(--accent-hover); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .hero-secondary {
-          font-size: 0.85rem;
+          font-size: clamp(0.85rem, 2vw, 0.95rem);
           color: var(--text-tertiary);
-        }
-
-        .hero-secondary button {
-          background: none;
-          border: none;
-          color: var(--accent);
-          font-size: 0.85rem;
-          font-weight: 500;
-          cursor: pointer;
-          border-bottom: 1px solid var(--accent);
-          padding: 0 0 1px 0;
-          font-family: 'DM Sans', system-ui, sans-serif;
-          transition: opacity 0.2s;
-        }
-
-        .hero-secondary button:hover { opacity: 0.7; }
-
-        .scroll-hint {
-          position: absolute;
-          bottom: 2rem;
-          left: 50%;
-          transform: translateX(-50%);
-          opacity: 0.4;
-        }
-
-        .scroll-hint svg {
-          width: 20px;
-          height: 20px;
-          stroke: var(--text-tertiary);
-          animation: bounce 2s ease-in-out infinite;
-        }
-
-        /* Shared section styles */
-        .section-label {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: var(--accent);
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          margin-bottom: 1rem;
-        }
-
-        .section-title {
-          font-size: clamp(1.5rem, 4vw, 2rem);
-          font-weight: 700;
-          line-height: 1.2;
-          margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-          font-size: 1rem;
-          color: var(--text-secondary);
-          margin-bottom: 3rem;
-          max-width: 480px;
-        }
-
-        /* Features grid */
-        .feature-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1px;
-          background: var(--border);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          overflow: hidden;
-        }
-
-        .feature-card {
-          background: var(--bg);
-          padding: 2rem 1.5rem;
-        }
-
-        .feature-icon {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.8rem;
-          font-weight: 500;
-          color: var(--accent);
-          background: var(--accent-light);
-          display: inline-block;
-          padding: 0.35rem 0.65rem;
-          border-radius: 6px;
-          margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-          font-size: 1rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-        }
-
-        .feature-card p {
-          font-size: 0.875rem;
-          color: var(--text-secondary);
-          line-height: 1.5;
-        }
-
-        @media (max-width: 540px) {
-          .feature-grid { grid-template-columns: 1fr; }
-        }
-
-        /* How it works — steps */
-        .steps {
-          display: flex;
-          flex-direction: column;
-          gap: 2.5rem;
-          position: relative;
-          padding-left: 2rem;
-        }
-
-        .steps::before {
-          content: '';
-          position: absolute;
-          left: 0.45rem;
-          top: 0.6rem;
-          bottom: 0.6rem;
-          width: 1px;
-          background: linear-gradient(to bottom, var(--accent), var(--border));
-        }
-
-        .step { position: relative; }
-
-        .step-number {
-          position: absolute;
-          left: -2rem;
-          top: 0;
-          width: 0.9rem;
-          height: 0.9rem;
-          border-radius: 50%;
-          background: var(--accent);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .step-number::after {
-          content: '';
-          width: 0.35rem;
-          height: 0.35rem;
-          border-radius: 50%;
-          background: var(--bg);
-        }
-
-        .step h3 {
-          font-size: 1.05rem;
-          font-weight: 700;
-          margin-bottom: 0.35rem;
-        }
-
-        .step p {
-          font-size: 0.9rem;
-          color: var(--text-secondary);
-          line-height: 1.5;
-        }
-
-        .step-code {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.8rem;
-          background: var(--code-bg);
-          color: var(--code-text);
-          padding: 0.9rem 1.1rem;
-          border-radius: 8px;
-          margin-top: 0.75rem;
-          overflow-x: auto;
           line-height: 1.6;
+          margin-bottom: 1.75rem;
+          max-width: 360px;
         }
 
-        /* Waitlist section */
-        .waitlist-box {
-          background: var(--bg-surface);
-          border: 1px solid var(--border-strong);
-          border-radius: 12px;
-          padding: 3rem 2rem;
-          text-align: center;
-        }
-
-        .waitlist-box h2 {
-          font-size: clamp(1.3rem, 3.5vw, 1.6rem);
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-        }
-
-        .waitlist-box > p {
-          font-size: 0.95rem;
-          color: var(--text-secondary);
-          margin-bottom: 2rem;
-          max-width: 380px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
+        /* Waitlist form */
         .form-row {
           display: flex;
-          gap: 0.5rem;
-          max-width: 400px;
-          margin: 0 auto;
+          gap: 0.4rem;
+          max-width: 360px;
+          margin-bottom: 0.35rem;
         }
 
         .form-row input[type="email"] {
           flex: 1;
           font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.9rem;
-          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+          padding: 0.65rem 0.85rem;
           border: 1px solid var(--border-strong);
           border-radius: 8px;
-          background: var(--bg);
+          background: var(--bg-surface);
           color: var(--text-primary);
           outline: none;
           transition: border-color 0.2s;
         }
 
-        .form-row input[type="email"]:focus { border-color: var(--accent); }
-        .form-row input[type="email"]::placeholder { color: var(--text-tertiary); }
+        .form-row input[type="email"]:focus {
+          border-color: var(--accent);
+        }
+
+        .form-row input[type="email"]::placeholder {
+          color: var(--text-tertiary);
+        }
+
+        .btn-notify {
+          font-family: 'DM Sans', system-ui, sans-serif;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #FFFFFF;
+          background: var(--accent);
+          border: none;
+          border-radius: 8px;
+          padding: 0.65rem 1.25rem;
+          cursor: pointer;
+          transition: background 0.2s;
+          white-space: nowrap;
+        }
+
+        .btn-notify:hover { background: var(--accent-hover); }
+        .btn-notify:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .form-message {
-          font-size: 0.85rem;
-          margin-top: 1rem;
-          min-height: 1.4em;
+          font-size: 0.8rem;
+          min-height: 1.2em;
+          margin-bottom: 0.25rem;
         }
 
         .form-message.success { color: var(--success); }
         .form-message.error { color: var(--error); }
 
         .form-note {
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           color: var(--text-tertiary);
-          margin-top: 1rem;
+          margin-bottom: 1.5rem;
         }
 
-        .waitlist-alt {
-          margin-top: 1.5rem;
-          padding-top: 1.5rem;
-          border-top: 1px solid var(--border);
-        }
-
-        .waitlist-alt a {
-          color: var(--accent);
-          font-size: 0.9rem;
+        /* Try planner link */
+        .try-planner {
+          font-size: 0.85rem;
           font-weight: 500;
+          color: var(--accent);
           text-decoration: none;
-          border-bottom: 1px solid var(--accent);
-          padding-bottom: 1px;
           transition: opacity 0.2s;
         }
 
-        .waitlist-alt a:hover { opacity: 0.7; }
+        .try-planner:hover { opacity: 0.7; }
 
-        @media (max-width: 440px) {
-          .form-row { flex-direction: column; }
-          .btn-primary { width: 100%; }
-          .waitlist-box { padding: 2rem 1.25rem; }
-        }
-
-        /* Footer */
-        .footer-bar {
-          position: fixed;
-          bottom: 0;
-          left: 0;
+        /* =============================================
+           RIGHT SIDE — Interactive preview card
+           ============================================= */
+        .preview-card {
+          background: var(--bg-surface);
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          box-shadow: var(--card-shadow);
           width: 100%;
-          text-align: center;
-          padding: 1rem;
-          z-index: 0;
-          opacity: 0;
-          transition: opacity 0.3s;
+          overflow: hidden;
         }
 
-        .footer-bar p {
+        /* Card header */
+        .preview-header {
+          padding: 14px 18px;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .preview-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 6px;
+        }
+
+        .preview-badges {
+          display: flex;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+
+        .badge {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.65rem;
+          font-weight: 500;
+          padding: 2px 7px;
+          border-radius: 4px;
+        }
+
+        .badge-platform {
+          background: var(--accent-light);
+          color: var(--accent);
+        }
+
+        .badge-difficulty {
+          background: rgba(22, 163, 74, 0.1);
+          color: #16A34A;
+        }
+
+        /* Tabs */
+        .preview-tabs {
+          display: flex;
+          border-bottom: 1px solid var(--border);
+          overflow-x: auto;
+        }
+
+        .preview-tab {
+          font-family: 'DM Sans', system-ui, sans-serif;
+          font-size: 0.7rem;
+          font-weight: 400;
+          color: var(--text-tertiary);
+          padding: 9px 14px;
+          border: none;
+          background: none;
+          cursor: pointer;
+          position: relative;
+          white-space: nowrap;
+          transition: color 0.15s;
+        }
+
+        .preview-tab:hover {
+          color: var(--text-secondary);
+        }
+
+        .preview-tab.active {
+          color: var(--accent);
+          font-weight: 500;
+        }
+
+        .preview-tab.active::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 12px;
+          right: 12px;
+          height: 2px;
+          background: var(--accent);
+          border-radius: 1px;
+        }
+
+        /* Tab content area */
+        .preview-content {
+          padding: 16px 18px;
+          min-height: 200px;
+        }
+
+        /* Overview tab items */
+        .overview-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 6px 0;
+        }
+
+        .overview-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .overview-label {
           font-size: 0.8rem;
+          font-weight: 500;
+          color: var(--text-primary);
+          flex: 1;
+        }
+
+        .overview-value {
+          font-size: 0.75rem;
           color: var(--text-tertiary);
         }
 
-        /* Animations */
-        @keyframes slash-draw {
-          to { stroke-dashoffset: 0; }
+        .coming-badge {
+          font-size: 0.6rem;
+          font-weight: 500;
+          color: var(--coming-text);
+          background: var(--coming-bg);
+          padding: 1px 6px;
+          border-radius: 3px;
+          letter-spacing: 0.02em;
         }
 
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(4px); }
+        /* Components tab */
+        .comp-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          padding: 5px 0;
+          font-size: 0.78rem;
+        }
+
+        .comp-name {
+          color: var(--text-primary);
+          font-weight: 400;
+        }
+
+        .comp-qty {
+          color: var(--text-tertiary);
+          font-size: 0.7rem;
+        }
+
+        .comp-price {
+          color: var(--text-secondary);
+          font-size: 0.72rem;
+          text-align: right;
+          min-width: 40px;
+        }
+
+        /* Wiring tab */
+        .wire-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 4px 0;
+          font-size: 0.75rem;
+        }
+
+        .wire-line {
+          width: 16px;
+          height: 2px;
+          border-radius: 1px;
+          flex-shrink: 0;
+        }
+
+        .wire-from {
+          color: var(--text-secondary);
+          flex: 1;
+        }
+
+        .wire-arrow {
+          color: var(--text-tertiary);
+          font-size: 0.65rem;
+        }
+
+        .wire-to {
+          color: var(--text-primary);
+          font-weight: 500;
+        }
+
+        /* Code tab */
+        .code-block {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          line-height: 1.7;
+          background: var(--code-bg);
+          color: var(--code-text);
+          padding: 14px 16px;
+          border-radius: 8px;
+          overflow-x: auto;
+          white-space: pre;
+        }
+
+        .code-keyword { color: var(--code-keyword); }
+        .code-string { color: var(--code-string); }
+        .code-comment { color: var(--code-comment); font-style: italic; }
+
+        /* Card footer — budget and time */
+        .preview-footer {
+          padding: 12px 18px;
+          border-top: 1px solid var(--border);
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .preview-stat-label {
+          font-size: 0.65rem;
+          color: var(--text-tertiary);
+          margin-bottom: 1px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .preview-stat-value {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        /* =============================================
+           FOOTER
+           ============================================= */
+        .landing-footer {
+          text-align: center;
+          padding: 1rem;
+          font-size: 0.75rem;
+          color: var(--text-tertiary);
+        }
+
+        /* =============================================
+           RESPONSIVE — mobile stacks vertically
+           ============================================= */
+        @media (max-width: 768px) {
+          .landing-main {
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem 1.25rem;
+            justify-content: flex-start;
+            padding-top: 3rem;
+          }
+
+          .landing-left {
+            max-width: 100%;
+            text-align: center;
+          }
+
+          .landing-left .hero-description {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .form-row {
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .form-note {
+            text-align: center;
+          }
+
+          .try-planner-wrap {
+            text-align: center;
+          }
+
+          .landing-right {
+            max-width: 380px;
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 440px) {
+          .form-row {
+            flex-direction: column;
+          }
+
+          .btn-notify {
+            width: 100%;
+          }
+
+          .preview-content {
+            padding: 14px 14px;
+          }
         }
       `}</style>
 
       <div className="landing-root">
-        {/* Scroll spacer — provides scroll distance for 4 panels */}
-        <div className="scroll-spacer" />
+        <main className="landing-main">
 
-        {/* Nav dots */}
-        <nav className="nav-dots" aria-label="Page navigation">
-          {["Hero", "Features", "How it works", "Waitlist"].map((label, i) => (
-            <button
-              key={i}
-              ref={(el) => { dotsRef.current[i] = el; }}
-              className={`nav-dot ${activePanel === i ? "active" : ""}`}
-              onClick={() => goToPanel(i)}
-              aria-label={label}
-            />
-          ))}
-        </nav>
+          {/* ======= LEFT SIDE — Brand + Waitlist ======= */}
+          <div className="landing-left">
 
-        {/* ======= 1. HERO ======= */}
-        <section
-          className="panel hero-panel"
-          ref={(el) => { panelsRef.current[0] = el; }}
-        >
-          <div className="panel-inner">
-            {/* Logo: full/make wordmark */}
+            {/* Logo with animated gradient slash */}
             <svg
               className="logo-landing"
               viewBox="0 0 440 56"
@@ -714,176 +611,237 @@ export default function LandingPage() {
 
             <p className="hero-tagline">Describe it. Make it.</p>
             <p className="hero-description">
-              Turn your project ideas into build-ready code, models, and designs.
+              Turn your project ideas into build-ready code, wiring diagrams,
+              and 3D models. Tell us what to build — we handle the rest.
             </p>
 
-            {/* Dual CTA: primary button + secondary text link */}
-            <div className="hero-cta">
-              <Link href="/app" className="btn-primary">
-                Try the Planner
-              </Link>
-              <p className="hero-secondary">
-                or{" "}
-                <button onClick={() => goToPanel(3)}>
-                  get notified when we launch
-                </button>
+            {/* Waitlist form */}
+            <div className="form-row">
+              <input
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                disabled={formState === "success"}
+              />
+              <button
+                className="btn-notify"
+                onClick={handleSubmit}
+                disabled={formState === "sending" || formState === "success"}
+              >
+                {formState === "sending"
+                  ? "Sending..."
+                  : formState === "success"
+                    ? "Done ✓"
+                    : "Notify me"}
+              </button>
+            </div>
+
+            {formMessage && (
+              <p className={`form-message ${formState === "error" ? "error" : "success"}`}>
+                {formMessage}
               </p>
+            )}
+
+            <p className="form-note">No spam. Only launch updates.</p>
+
+            <div className="try-planner-wrap">
+              <Link href="/app" className="try-planner">
+                Try the Planner →
+              </Link>
             </div>
           </div>
 
-          <div className="scroll-hint">
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </div>
-        </section>
+          {/* ======= RIGHT SIDE — Interactive Preview Card ======= */}
+          <div className="landing-right">
+            <div className="preview-card">
 
-        {/* ======= 2. FEATURES ======= */}
-        <section
-          className="panel"
-          ref={(el) => { panelsRef.current[1] = el; }}
-        >
-          <div className="panel-inner">
-            <p className="section-label">What you get</p>
-            <h2 className="section-title">Everything your project needs</h2>
-            <p className="section-subtitle">
-              Describe what you want to build. Fullmake generates everything you
-              need to start making.
-            </p>
-
-            <div className="feature-grid">
-              <div className="feature-card">
-                <span className="feature-icon">plan</span>
-                <h3>Project planner</h3>
-                <p>
-                  Get a hardware recommendation, component list, budget estimate,
-                  and step-by-step build guide.
-                </p>
-              </div>
-              <div className="feature-card">
-                <span className="feature-icon">.ino</span>
-                <h3>Generated code</h3>
-                <p>
-                  Arduino, ESP32, or Raspberry Pi code — commented, tested, and
-                  ready to upload.
-                </p>
-              </div>
-              <div className="feature-card">
-                <span className="feature-icon">.stl</span>
-                <h3>3D models</h3>
-                <p>
-                  Parametric enclosures, mounts, and parts generated as OpenSCAD
-                  files for 3D printing.
-                </p>
-              </div>
-              <div className="feature-card">
-                <span className="feature-icon">.svg</span>
-                <h3>Laser designs</h3>
-                <p>
-                  Vector files for laser cutting and engraving — panels, labels,
-                  decorative pieces.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ======= 3. HOW IT WORKS ======= */}
-        <section
-          className="panel"
-          ref={(el) => { panelsRef.current[2] = el; }}
-        >
-          <div className="panel-inner">
-            <p className="section-label">How it works</p>
-            <h2 className="section-title">Three steps to your next build</h2>
-
-            <div className="steps">
-              <div className="step">
-                <div className="step-number" />
-                <h3>Describe your project</h3>
-                <p>Tell Fullmake what you want to build, in plain language.</p>
-                <div className="step-code">
-                  &gt; &quot;Automatic cat feeder with WiFi
-                  <br />
-                  &nbsp;&nbsp;control and scheduled feeding times&quot;
+              {/* Header */}
+              <div className="preview-header">
+                <div className="preview-title">WiFi cat feeder with scheduling</div>
+                <div className="preview-badges">
+                  <span className="badge badge-platform">ESP32</span>
+                  <span className="badge badge-difficulty">intermediate</span>
                 </div>
               </div>
-              <div className="step">
-                <div className="step-number" />
-                <h3>Get your build package</h3>
-                <p>
-                  Receive a complete project plan with components, code, models,
-                  and wiring diagrams — all tailored to your description.
-                </p>
+
+              {/* Tabs */}
+              <div className="preview-tabs">
+                {tabs.map((tab, i) => (
+                  <button
+                    key={tab}
+                    className={`preview-tab ${activeTab === i ? "active" : ""}`}
+                    onClick={() => setActiveTab(i)}
+                  >
+                    {tab}
+                  </button>
+                ))}
               </div>
-              <div className="step">
-                <div className="step-number" />
-                <h3>Build it</h3>
-                <p>
-                  Download your files, order the parts, and start making.
-                  Everything is ready to use — no blank-page problem.
-                </p>
+
+              {/* Tab content */}
+              <div className="preview-content">
+                {activeTab === 0 && (
+                  <div>
+                    <div className="overview-item">
+                      <div className="overview-dot" style={{ background: "#D97706" }} />
+                      <span className="overview-label">8 components</span>
+                      <span className="overview-value">~€24</span>
+                    </div>
+                    <div className="overview-item">
+                      <div className="overview-dot" style={{ background: "#16A34A" }} />
+                      <span className="overview-label">Arduino code</span>
+                      <span className="overview-value">145 lines</span>
+                    </div>
+                    <div className="overview-item">
+                      <div className="overview-dot" style={{ background: "#3B82F6" }} />
+                      <span className="overview-label">Wiring diagram</span>
+                      <span className="overview-value">12 connections</span>
+                    </div>
+                    <div className="overview-item">
+                      <div className="overview-dot" style={{ background: "#8B5CF6" }} />
+                      <span className="overview-label">3D enclosure</span>
+                      <span className="coming-badge">coming soon</span>
+                    </div>
+                    <div className="overview-item">
+                      <div className="overview-dot" style={{ background: "#EC4899" }} />
+                      <span className="overview-label">Laser-cut panels</span>
+                      <span className="coming-badge">coming soon</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 1 && (
+                  <div>
+                    <div className="comp-item">
+                      <span className="comp-name">ESP32 DevKit V1</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€5.50</span>
+                    </div>
+                    <div className="comp-item">
+                      <span className="comp-name">SG90 Micro Servo 9g</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€2.50</span>
+                    </div>
+                    <div className="comp-item">
+                      <span className="comp-name">IR Obstacle Sensor</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€1.50</span>
+                    </div>
+                    <div className="comp-item">
+                      <span className="comp-name">Status LEDs (pack)</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€1.00</span>
+                    </div>
+                    <div className="comp-item">
+                      <span className="comp-name">220Ω Resistors (pack)</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€1.00</span>
+                    </div>
+                    <div className="comp-item">
+                      <span className="comp-name">Breadboard</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€3.00</span>
+                    </div>
+                    <div className="comp-item">
+                      <span className="comp-name">Jumper wires (pack)</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€2.00</span>
+                    </div>
+                    <div className="comp-item" style={{ borderTop: "1px solid var(--border)", marginTop: "6px", paddingTop: "8px" }}>
+                      <span className="comp-name" style={{ fontWeight: 600 }}>USB Micro cable</span>
+                      <span className="comp-qty">×1</span>
+                      <span className="comp-price">€2.00</span>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 2 && (
+                  <div>
+                    <div className="wire-item">
+                      <div className="wire-line" style={{ background: "#EF4444" }} />
+                      <span className="wire-from">Servo VCC</span>
+                      <span className="wire-arrow">→</span>
+                      <span className="wire-to">5V (ext.)</span>
+                    </div>
+                    <div className="wire-item">
+                      <div className="wire-line" style={{ background: "#6B7280" }} />
+                      <span className="wire-from">Servo GND</span>
+                      <span className="wire-arrow">→</span>
+                      <span className="wire-to">GND</span>
+                    </div>
+                    <div className="wire-item">
+                      <div className="wire-line" style={{ background: "#F59E0B" }} />
+                      <span className="wire-from">Servo Signal</span>
+                      <span className="wire-arrow">→</span>
+                      <span className="wire-to">GPIO13</span>
+                    </div>
+                    <div className="wire-item">
+                      <div className="wire-line" style={{ background: "#3B82F6" }} />
+                      <span className="wire-from">IR Sensor OUT</span>
+                      <span className="wire-arrow">→</span>
+                      <span className="wire-to">GPIO14</span>
+                    </div>
+                    <div className="wire-item">
+                      <div className="wire-line" style={{ background: "#3B82F6" }} />
+                      <span className="wire-from">LED WiFi</span>
+                      <span className="wire-arrow">→</span>
+                      <span className="wire-to">GPIO2</span>
+                    </div>
+                    <div className="wire-item">
+                      <div className="wire-line" style={{ background: "#3B82F6" }} />
+                      <span className="wire-from">LED Feed</span>
+                      <span className="wire-arrow">→</span>
+                      <span className="wire-to">GPIO4</span>
+                    </div>
+                    <div className="wire-item" style={{ paddingTop: "8px" }}>
+                      <span style={{ fontSize: "0.68rem", color: "var(--text-tertiary)", fontStyle: "italic" }}>
+                        + 6 more connections...
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 3 && (
+                  <div className="code-block">
+                    <span className="code-comment">// WiFi Cat Feeder — ESP32</span>{"\n"}
+                    <span className="code-keyword">#include</span>{" <WiFi.h>"}{"\n"}
+                    <span className="code-keyword">#include</span>{" <WebServer.h>"}{"\n"}
+                    <span className="code-keyword">#include</span>{" <ESP32Servo.h>"}{"\n"}
+                    {"\n"}
+                    <span className="code-keyword">const char</span>{"* ssid = "}<span className="code-string">{'"YOUR_SSID"'}</span>{";"}{"\n"}
+                    <span className="code-keyword">Servo</span>{" feederServo;"}{"\n"}
+                    {"\n"}
+                    <span className="code-keyword">void</span>{" setup() {"}{"\n"}
+                    {"  Serial.begin(115200);"}{"\n"}
+                    {"  feederServo.attach(13);"}{"\n"}
+                    {"  WiFi.begin(ssid, pass);"}{"\n"}
+                    {"  "}<span className="code-comment">// ... 135 more lines</span>{"\n"}
+                    {"}"}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer — budget + time */}
+              <div className="preview-footer">
+                <div>
+                  <div className="preview-stat-label">Est. budget</div>
+                  <div className="preview-stat-value">€24.50</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div className="preview-stat-label">Build time</div>
+                  <div className="preview-stat-value">2–3 hours</div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* ======= 4. WAITLIST ======= */}
-        <section
-          className="panel"
-          ref={(el) => { panelsRef.current[3] = el; }}
-        >
-          <div className="panel-inner">
-            <div className="waitlist-box">
-              <h2>Be the first to build</h2>
-              <p>
-                We&apos;re building Fullmake right now. Leave your email — we&apos;ll
-                let you know when it&apos;s ready to try.
-              </p>
+        </main>
 
-              <div className="form-row">
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  disabled={formState === "success"}
-                />
-                <button
-                  className="btn-primary"
-                  onClick={handleSubmit}
-                  disabled={formState === "sending" || formState === "success"}
-                >
-                  {formState === "sending"
-                    ? "Sending..."
-                    : formState === "success"
-                      ? "Done"
-                      : "Notify me"}
-                </button>
-              </div>
-
-              {formMessage && (
-                <p className={`form-message ${formState === "error" ? "error" : "success"}`}>
-                  {formMessage}
-                </p>
-              )}
-
-              <p className="form-note">No spam. Only launch updates.</p>
-
-              {/* Secondary CTA — try the planner now */}
-              <div className="waitlist-alt">
-                <Link href="/app">Or try the Planner now →</Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <div className="footer-bar" ref={footerRef}>
-          <p>&copy; 2026 Fullmake</p>
-        </div>
+        <footer className="landing-footer">
+          © 2026 Fullmake
+        </footer>
       </div>
     </>
   );
