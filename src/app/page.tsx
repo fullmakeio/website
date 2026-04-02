@@ -252,7 +252,17 @@ export default function LandingPage() {
         .form-note {
           font-size: 0.75rem;
           color: var(--text-tertiary);
+          margin-bottom: 0.75rem;
+        }
+
+        .status-signal {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.68rem;
+          font-weight: 500;
+          color: var(--accent);
+          letter-spacing: 0.03em;
           margin-bottom: 1.5rem;
+          opacity: 0.85;
         }
 
         /* Try planner link */
@@ -265,6 +275,12 @@ export default function LandingPage() {
         }
 
         .try-planner:hover { opacity: 0.7; }
+
+        .link-separator {
+          color: var(--text-tertiary);
+          margin: 0 0.5rem;
+          font-size: 0.85rem;
+        }
 
         /* =============================================
            RIGHT SIDE — Interactive preview card
@@ -639,7 +655,7 @@ export default function LandingPage() {
                   ? "Sending..."
                   : formState === "success"
                     ? "Done ✓"
-                    : "Notify me"}
+                    : "Get early Access"}
               </button>
             </div>
 
@@ -649,11 +665,16 @@ export default function LandingPage() {
               </p>
             )}
 
-            <p className="form-note">No spam. Only launch updates.</p>
+            <p className="form-note">Be among the first to try Fullmake when it launches.</p>
+            <p className="status-signal">Launching soon • Limited early access</p>
 
             <div className="try-planner-wrap">
               <Link href="/app" className="try-planner">
                 Try the Planner →
+              </Link>
+              <span className="link-separator">·</span>
+              <Link href="/how-it-works" className="try-planner">
+                How it works
               </Link>
             </div>
           </div>
@@ -710,7 +731,7 @@ export default function LandingPage() {
                     </div>
                     <div className="overview-item">
                       <div className="overview-dot" style={{ background: "#EC4899" }} />
-                      <span className="overview-label">Laser-cut panels</span>
+                      <span className="overview-label">Laser-cut faceplate</span>
                       <span className="coming-badge">coming soon</span>
                     </div>
                   </div>
