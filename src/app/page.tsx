@@ -691,7 +691,7 @@ export default function LandingPage() {
                     <div className="overview-item">
                       <div className="overview-dot" style={{ background: "#D97706" }} />
                       <span className="overview-label">8 components</span>
-                      <span className="overview-value">~€24</span>
+                      <span className="overview-value">~€19</span>
                     </div>
                     <div className="overview-item">
                       <div className="overview-dot" style={{ background: "#16A34A" }} />
@@ -835,7 +835,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div className="preview-stat-label">Est. budget</div>
-                  <div className="preview-stat-value">€24.50</div>
+                  <div className="preview-stat-value">€18.50</div>
                 </div>
               </div>
             </div>
