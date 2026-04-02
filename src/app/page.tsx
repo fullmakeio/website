@@ -753,8 +753,8 @@ export default function LandingPage() {
                       <span className="comp-qty">×1</span>
                       <span className="comp-price">€2.00</span>
                     </div>
-                    <div className="comp-item" style={{ borderTop: "1px solid var(--border)", marginTop: "6px", paddingTop: "8px" }}>
-                      <span className="comp-name" style={{ fontWeight: 600 }}>USB Micro cable</span>
+                    <div className="comp-item">
+                      <span className="comp-name">USB Micro cable</span>
                       <span className="comp-qty">×1</span>
                       <span className="comp-price">€2.00</span>
                     </div>
@@ -830,12 +830,12 @@ export default function LandingPage() {
               {/* Footer — budget + time */}
               <div className="preview-footer">
                 <div>
-                  <div className="preview-stat-label">Est. budget</div>
-                  <div className="preview-stat-value">€24.50</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
                   <div className="preview-stat-label">Build time</div>
                   <div className="preview-stat-value">2–3 hours</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div className="preview-stat-label">Est. budget</div>
+                  <div className="preview-stat-value">€24.50</div>
                 </div>
               </div>
             </div>
