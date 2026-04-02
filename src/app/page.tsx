@@ -319,21 +319,22 @@ export default function LandingPage() {
         .preview-tabs {
           display: flex;
           border-bottom: 1px solid var(--border);
-          overflow-x: auto;
         }
 
         .preview-tab {
+          flex: 1;
           font-family: 'DM Sans', system-ui, sans-serif;
-          font-size: 0.7rem;
+          font-size: 0.72rem;
           font-weight: 400;
           color: var(--text-tertiary);
-          padding: 9px 14px;
+          padding: 9px 8px;
           border: none;
           background: none;
           cursor: pointer;
           position: relative;
           white-space: nowrap;
           transition: color 0.15s;
+          text-align: center;
         }
 
         .preview-tab:hover {
@@ -349,8 +350,8 @@ export default function LandingPage() {
           content: '';
           position: absolute;
           bottom: -1px;
-          left: 12px;
-          right: 12px;
+          left: 20%;
+          right: 20%;
           height: 2px;
           background: var(--accent);
           border-radius: 1px;
@@ -401,8 +402,9 @@ export default function LandingPage() {
 
         /* Components tab */
         .comp-item {
-          display: flex;
-          justify-content: space-between;
+          display: grid;
+          grid-template-columns: 1fr auto auto;
+          gap: 12px;
           align-items: baseline;
           padding: 5px 0;
           font-size: 0.78rem;
@@ -416,13 +418,15 @@ export default function LandingPage() {
         .comp-qty {
           color: var(--text-tertiary);
           font-size: 0.7rem;
+          text-align: center;
+          min-width: 24px;
         }
 
         .comp-price {
           color: var(--text-secondary);
           font-size: 0.72rem;
           text-align: right;
-          min-width: 40px;
+          min-width: 44px;
         }
 
         /* Wiring tab */
@@ -691,7 +695,7 @@ export default function LandingPage() {
                     </div>
                     <div className="overview-item">
                       <div className="overview-dot" style={{ background: "#16A34A" }} />
-                      <span className="overview-label">Arduino code</span>
+                      <span className="overview-label">Generated code</span>
                       <span className="overview-value">145 lines</span>
                     </div>
                     <div className="overview-item">
