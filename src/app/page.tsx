@@ -216,62 +216,88 @@ export default function LandingPage() {
         }
 
         /* =============================================
-           HOW IT WORKS — Animated (Chat #14)
+           HOW IT WORKS — Three-step flow (Chat #14)
+           Describe → Generate → Build
            ============================================= */
-        .hiw-section { padding: 5rem 2rem 4rem; max-width: 960px; margin: 0 auto; }
+        .hiw-section { padding: 5rem 2rem 4rem; max-width: 1060px; margin: 0 auto; }
         .hiw-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
         .hiw-title { font-size: clamp(1.4rem, 3.5vw, 1.8rem); font-weight: 700; margin-bottom: 2.5rem; }
-        .hiw-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
-        @media (max-width: 700px) { .hiw-layout { grid-template-columns: 1fr; gap: 2rem; } .hiw-section { padding: 3rem 1.25rem; } }
-        .hiw-terminal { background: var(--code-bg); border-radius: 10px; overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.7; }
-        .hiw-terminal-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: rgba(0,0,0,0.25); }
-        .hiw-terminal-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* Three-step flow: Describe → Generate → Build */
+        .hiw-steps { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 1.5rem; align-items: start; margin-bottom: 3rem; }
+        .hiw-step { position: relative; }
+        .hiw-step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+        .hiw-step-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 600; color: var(--accent); background: var(--accent-light); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .hiw-step-name { font-size: 0.95rem; font-weight: 700; }
+        .hiw-arrow { position: absolute; right: -1rem; top: 50%; color: var(--text-tertiary); font-size: 1.2rem; opacity: 0; }
+        .hiw-section.active .hiw-arrow { animation: hiw-fadeIn 0.3s ease 0.5s forwards; }
+
+        /* Step 1: Terminal */
+        .hiw-terminal { background: var(--code-bg); border-radius: 10px; overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; line-height: 1.7; }
+        .hiw-terminal-bar { display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: rgba(0,0,0,0.25); }
+        .hiw-terminal-dot { width: 7px; height: 7px; border-radius: 50%; }
         .hiw-terminal-dot:nth-child(1) { background: #EF4444; }
         .hiw-terminal-dot:nth-child(2) { background: #EAB308; }
         .hiw-terminal-dot:nth-child(3) { background: #22C55E; }
-        .hiw-terminal-body { padding: 14px 16px 18px; min-height: 200px; }
-        .hiw-terminal-prompt { color: #78716C; }
-        .hiw-typing { color: #D6D3D1; overflow: hidden; white-space: nowrap; border-right: 2px solid var(--accent); width: 0; display: inline-block; vertical-align: bottom; }
+        .hiw-terminal-body { padding: 12px 14px 16px; }
+        .hiw-terminal-prompt { color: #78716C; font-size: 0.68rem; }
+        .hiw-typing { color: #D6D3D1; overflow: hidden; white-space: nowrap; border-right: 2px solid var(--accent); width: 0; display: inline-block; vertical-align: bottom; font-size: 0.7rem; }
         .hiw-section.active .hiw-typing { animation: hiw-type 2.5s steps(38) 0.6s forwards, hiw-blink 0.6s step-end 6 0.6s; }
-        .hiw-generating { color: var(--accent); margin-top: 12px; opacity: 0; }
-        .hiw-section.active .hiw-generating { animation: hiw-fadeIn 0.3s ease 3.3s forwards; }
-        .hiw-dot1, .hiw-dot2, .hiw-dot3 { opacity: 0; }
-        .hiw-section.active .hiw-dot1 { animation: hiw-blinkDot 1.5s ease-in-out 3.3s infinite; }
-        .hiw-section.active .hiw-dot2 { animation: hiw-blinkDot 1.5s ease-in-out 3.6s infinite; }
-        .hiw-section.active .hiw-dot3 { animation: hiw-blinkDot 1.5s ease-in-out 3.9s infinite; }
-        .hiw-output-preview { margin-top: 12px; opacity: 0; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; }
-        .hiw-section.active .hiw-output-preview { animation: hiw-fadeIn 0.4s ease 4.8s forwards; }
-        .hiw-output-label { color: #78716C; font-size: 0.7rem; margin-bottom: 8px; }
-        .hiw-wire { stroke-dasharray: 100; stroke-dashoffset: 100; fill: none; }
-        .hiw-section.active .hiw-wire { animation: hiw-wireDraw 0.8s ease forwards; }
-        .hiw-section.active .hiw-wire:nth-child(1) { animation-delay: 5s; }
-        .hiw-section.active .hiw-wire:nth-child(2) { animation-delay: 5.3s; }
-        .hiw-section.active .hiw-wire:nth-child(3) { animation-delay: 5.6s; }
-        .hiw-section.active .hiw-wire:nth-child(4) { animation-delay: 5.9s; }
-        .hiw-chip { opacity: 0; }
-        .hiw-section.active .hiw-chip { animation: hiw-fadeIn 0.3s ease 4.8s forwards; }
-        .hiw-cards { display: flex; flex-direction: column; gap: 10px; }
-        .hiw-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; opacity: 0; transform: translateY(12px); }
-        .hiw-section.active .hiw-card { animation: hiw-cardIn 0.45s ease forwards; }
-        .hiw-section.active .hiw-card:nth-child(1) { animation-delay: 3.6s; }
-        .hiw-section.active .hiw-card:nth-child(2) { animation-delay: 3.9s; }
-        .hiw-section.active .hiw-card:nth-child(3) { animation-delay: 4.2s; }
-        .hiw-section.active .hiw-card:nth-child(4) { animation-delay: 4.5s; }
-        .hiw-section.active .hiw-card:nth-child(5) { animation-delay: 4.8s; }
-        .hiw-card-icon { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 6px 10px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
-        .hiw-card-text h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; color: var(--text-primary); }
-        .hiw-card-text p { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; }
-        .hiw-coming { font-size: 0.65rem; font-weight: 500; color: var(--text-tertiary); background: var(--coming-bg); padding: 2px 7px; border-radius: 4px; margin-left: 6px; }
-        .hiw-done { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 0.82rem; font-weight: 500; color: var(--accent); opacity: 0; }
-        .hiw-section.active .hiw-done { animation: hiw-fadeIn 0.4s ease 5.3s forwards; }
-        .hiw-done svg { width: 18px; height: 18px; }
-        .hiw-done-check { stroke-dasharray: 24; stroke-dashoffset: 24; }
-        .hiw-section.active .hiw-done-check { animation: hiw-wireDraw 0.4s ease 5.5s forwards; }
+
+        /* Step 2: Wiring diagram — realistic board layout */
+        .hiw-wiring-wrap { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; overflow: hidden; }
+        .hiw-wiring-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-tertiary); margin-bottom: 8px; }
+        .hiw-wire { stroke-dasharray: 120; stroke-dashoffset: 120; fill: none; }
+        .hiw-section.active .hiw-wire { animation: hiw-wireDraw 0.6s ease forwards; }
+        .hiw-section.active .hiw-wire:nth-child(1) { animation-delay: 3.2s; }
+        .hiw-section.active .hiw-wire:nth-child(2) { animation-delay: 3.5s; }
+        .hiw-section.active .hiw-wire:nth-child(3) { animation-delay: 3.8s; }
+        .hiw-section.active .hiw-wire:nth-child(4) { animation-delay: 4.1s; }
+        .hiw-section.active .hiw-wire:nth-child(5) { animation-delay: 4.4s; }
+        .hiw-section.active .hiw-wire:nth-child(6) { animation-delay: 4.7s; }
+        .hiw-board-label { font-size: 8px; font-family: 'JetBrains Mono', monospace; }
+        .hiw-pin-label { font-size: 6px; font-family: 'JetBrains Mono', monospace; }
+        .hiw-comp-label { font-size: 7px; font-family: 'JetBrains Mono', monospace; }
+        .hiw-wiring-svg { opacity: 0; }
+        .hiw-section.active .hiw-wiring-svg { animation: hiw-fadeIn 0.4s ease 2.8s forwards; }
+
+        /* Step 3: Build — checklist */
+        .hiw-build-list { display: flex; flex-direction: column; gap: 10px; }
+        .hiw-build-item { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--text-secondary); opacity: 0; transform: translateX(8px); }
+        .hiw-section.active .hiw-build-item { animation: hiw-slideIn 0.35s ease forwards; }
+        .hiw-section.active .hiw-build-item:nth-child(1) { animation-delay: 5s; }
+        .hiw-section.active .hiw-build-item:nth-child(2) { animation-delay: 5.3s; }
+        .hiw-section.active .hiw-build-item:nth-child(3) { animation-delay: 5.6s; }
+        .hiw-section.active .hiw-build-item:nth-child(4) { animation-delay: 5.9s; }
+        .hiw-check { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+
+        /* Output cards row — below the 3 steps */
+        .hiw-outputs { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .hiw-output { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; opacity: 0; transform: translateY(8px); }
+        .hiw-section.active .hiw-output { animation: hiw-cardIn 0.4s ease forwards; }
+        .hiw-section.active .hiw-output:nth-child(1) { animation-delay: 6.2s; }
+        .hiw-section.active .hiw-output:nth-child(2) { animation-delay: 6.4s; }
+        .hiw-section.active .hiw-output:nth-child(3) { animation-delay: 6.6s; }
+        .hiw-section.active .hiw-output:nth-child(4) { animation-delay: 6.8s; }
+        .hiw-section.active .hiw-output:nth-child(5) { animation-delay: 7.0s; }
+        .hiw-output-icon { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 4px 8px; border-radius: 5px; }
+        .hiw-output-name { font-size: 0.78rem; font-weight: 500; color: var(--text-primary); }
+        .hiw-coming { font-size: 0.6rem; font-weight: 500; color: var(--text-tertiary); background: var(--coming-bg); padding: 1px 6px; border-radius: 3px; margin-left: 2px; }
+
+        @media (max-width: 768px) {
+          .hiw-steps { grid-template-columns: 1fr; gap: 2rem; }
+          .hiw-arrow { display: none; }
+          .hiw-section { padding: 3rem 1.25rem; }
+          .hiw-outputs { flex-direction: column; align-items: stretch; }
+        }
+
+        /* Animations */
         @keyframes hiw-type { from { width: 0; } to { width: 100%; } }
         @keyframes hiw-blink { 50% { border-color: transparent; } }
         @keyframes hiw-fadeIn { to { opacity: 1; } }
         @keyframes hiw-cardIn { to { opacity: 1; transform: translateY(0); } }
         @keyframes hiw-wireDraw { to { stroke-dashoffset: 0; } }
+        @keyframes hiw-slideIn { to { opacity: 1; transform: translateX(0); } }
         @keyframes hiw-blinkDot { 0%, 100% { opacity: 0; } 30%, 70% { opacity: 1; } }
       `}</style>
 
@@ -368,49 +394,110 @@ export default function LandingPage() {
           </div>
         </main>
 
-        {/* ======= HOW IT WORKS — Animated (Chat #14) ======= */}
+        {/* ======= HOW IT WORKS — Three-step flow (Chat #14) ======= */}
         <div className="hiw-section" ref={hiwRef}>
           <p className="hiw-label">How it works</p>
-          <h2 className="hiw-title">Describe → Generate → Build</h2>
-          <div className="hiw-layout">
-            <div>
+          <h2 className="hiw-title">Three steps to your next build</h2>
+
+          {/* Three columns: Describe → Generate → Build */}
+          <div className="hiw-steps">
+
+            {/* Step 1: Describe */}
+            <div className="hiw-step">
+              <div className="hiw-step-header">
+                <span className="hiw-step-num">1</span>
+                <span className="hiw-step-name">Describe</span>
+              </div>
               <div className="hiw-terminal">
                 <div className="hiw-terminal-bar"><span className="hiw-terminal-dot" /><span className="hiw-terminal-dot" /><span className="hiw-terminal-dot" /></div>
                 <div className="hiw-terminal-body">
-                  <div className="hiw-terminal-prompt">{">"} Describe your project:</div>
+                  <div className="hiw-terminal-prompt">{">"} Your project:</div>
                   <div style={{ marginTop: "4px" }}><span className="hiw-typing">WiFi cat feeder with scheduled times</span></div>
-                  <div className="hiw-generating"><span>Generating</span><span className="hiw-dot1">.</span><span className="hiw-dot2">.</span><span className="hiw-dot3">.</span></div>
-                  <div className="hiw-output-preview">
-                    <div className="hiw-output-label">wiring_diagram.svg</div>
-                    <svg viewBox="0 0 220 90" width="100%" xmlns="http://www.w3.org/2000/svg">
-                      <rect className="hiw-chip" x="10" y="15" width="60" height="60" rx="4" fill="none" stroke="var(--accent)" strokeWidth="1.5" />
-                      <text className="hiw-chip" x="24" y="50" fill="var(--accent)" fontSize="9" fontFamily="JetBrains Mono, monospace">ESP32</text>
-                      <rect className="hiw-chip" x="150" y="8" width="55" height="30" rx="4" fill="none" stroke="#D6D3D1" strokeWidth="1" opacity="0.6" />
-                      <text className="hiw-chip" x="158" y="27" fill="#D6D3D1" fontSize="7" fontFamily="JetBrains Mono, monospace" opacity="0.7">Servo</text>
-                      <rect className="hiw-chip" x="150" y="52" width="55" height="30" rx="4" fill="none" stroke="#D6D3D1" strokeWidth="1" opacity="0.6" />
-                      <text className="hiw-chip" x="155" y="71" fill="#D6D3D1" fontSize="7" fontFamily="JetBrains Mono, monospace" opacity="0.7">DS3231</text>
-                      <line className="hiw-wire" x1="70" y1="30" x2="150" y2="20" stroke="#EF4444" strokeWidth="1.5" />
-                      <line className="hiw-wire" x1="70" y1="40" x2="150" y2="28" stroke="#3B82F6" strokeWidth="1.5" />
-                      <line className="hiw-wire" x1="70" y1="55" x2="150" y2="60" stroke="#22C55E" strokeWidth="1.5" />
-                      <line className="hiw-wire" x1="70" y1="65" x2="150" y2="72" stroke="#A855F7" strokeWidth="1.5" />
-                    </svg>
-                  </div>
                 </div>
               </div>
+              <span className="hiw-arrow">→</span>
             </div>
-            <div>
-              <div className="hiw-cards">
-                <div className="hiw-card"><span className="hiw-card-icon">plan</span><div className="hiw-card-text"><h4>Project plan</h4><p>Components, budget, platform recommendation</p></div></div>
-                <div className="hiw-card"><span className="hiw-card-icon">.ino</span><div className="hiw-card-text"><h4>Full source code</h4><p>Commented, tested, ready to upload</p></div></div>
-                <div className="hiw-card"><span className="hiw-card-icon">svg</span><div className="hiw-card-text"><h4>Wiring diagram</h4><p>Interactive pin-by-pin connections</p></div></div>
-                <div className="hiw-card"><span className="hiw-card-icon">.stl</span><div className="hiw-card-text"><h4>3D enclosure <span className="hiw-coming">coming soon</span></h4><p>Parametric models for 3D printing</p></div></div>
-                <div className="hiw-card"><span className="hiw-card-icon">.svg</span><div className="hiw-card-text"><h4>Laser designs <span className="hiw-coming">coming soon</span></h4><p>Cut and engrave files for your project</p></div></div>
+
+            {/* Step 2: Generate — realistic wiring diagram */}
+            <div className="hiw-step">
+              <div className="hiw-step-header">
+                <span className="hiw-step-num">2</span>
+                <span className="hiw-step-name">Generate</span>
               </div>
-              <div className="hiw-done">
-                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="var(--accent)" strokeWidth="1.5" /><path className="hiw-done-check" d="M8 12.5l2.5 2.5 5-5" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                Ready to build
+              <div className="hiw-wiring-wrap">
+                <div className="hiw-wiring-label">wiring_diagram.svg</div>
+                <svg className="hiw-wiring-svg" viewBox="0 0 300 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+                  {/* ESP32 Board */}
+                  <rect x="100" y="20" width="100" height="140" rx="6" fill="none" stroke="var(--accent)" strokeWidth="1.5" />
+                  <text className="hiw-board-label" x="150" y="14" fill="var(--accent)" textAnchor="middle" fontWeight="600">ESP32 DevKit V1</text>
+                  {/* Left pins */}
+                  <text className="hiw-pin-label" x="96" y="48" fill="var(--text-tertiary)" textAnchor="end">3V3</text>
+                  <text className="hiw-pin-label" x="96" y="68" fill="var(--text-tertiary)" textAnchor="end">GND</text>
+                  <text className="hiw-pin-label" x="96" y="88" fill="var(--text-tertiary)" textAnchor="end">GPIO13</text>
+                  <text className="hiw-pin-label" x="96" y="108" fill="var(--text-tertiary)" textAnchor="end">GPIO14</text>
+                  <text className="hiw-pin-label" x="96" y="128" fill="var(--text-tertiary)" textAnchor="end">GPIO2</text>
+                  <text className="hiw-pin-label" x="96" y="148" fill="var(--text-tertiary)" textAnchor="end">GPIO4</text>
+                  {/* Right pins */}
+                  <text className="hiw-pin-label" x="204" y="48" fill="var(--text-tertiary)" textAnchor="start">5V</text>
+                  <text className="hiw-pin-label" x="204" y="68" fill="var(--text-tertiary)" textAnchor="start">GND</text>
+                  <text className="hiw-pin-label" x="204" y="88" fill="var(--text-tertiary)" textAnchor="start">SDA</text>
+                  <text className="hiw-pin-label" x="204" y="108" fill="var(--text-tertiary)" textAnchor="start">SCL</text>
+                  {/* Pin dots */}
+                  <circle cx="100" cy="45" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="100" cy="65" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="100" cy="85" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="100" cy="105" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="100" cy="125" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="100" cy="145" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="200" cy="45" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="200" cy="65" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="200" cy="85" r="2" fill="var(--accent)" opacity="0.6" />
+                  <circle cx="200" cy="105" r="2" fill="var(--accent)" opacity="0.6" />
+                  {/* Servo component */}
+                  <rect x="10" y="55" width="50" height="45" rx="4" fill="none" stroke="var(--text-tertiary)" strokeWidth="1" />
+                  <text className="hiw-comp-label" x="35" y="75" fill="var(--text-secondary)" textAnchor="middle" fontWeight="500">SG90</text>
+                  <text className="hiw-comp-label" x="35" y="86" fill="var(--text-tertiary)" textAnchor="middle">Servo</text>
+                  {/* DS3231 RTC */}
+                  <rect x="240" y="55" width="50" height="45" rx="4" fill="none" stroke="var(--text-tertiary)" strokeWidth="1" />
+                  <text className="hiw-comp-label" x="265" y="75" fill="var(--text-secondary)" textAnchor="middle" fontWeight="500">DS3231</text>
+                  <text className="hiw-comp-label" x="265" y="86" fill="var(--text-tertiary)" textAnchor="middle">RTC</text>
+                  {/* IR Sensor */}
+                  <rect x="10" y="115" width="50" height="38" rx="4" fill="none" stroke="var(--text-tertiary)" strokeWidth="1" />
+                  <text className="hiw-comp-label" x="35" y="135" fill="var(--text-secondary)" textAnchor="middle" fontWeight="500">IR Sensor</text>
+                  {/* Wires — draw in sequentially */}
+                  <path className="hiw-wire" d="M60 65 L100 65" stroke="#6B7280" strokeWidth="1.5" />
+                  <path className="hiw-wire" d="M60 75 L80 75 L80 85 L100 85" stroke="#F59E0B" strokeWidth="1.5" />
+                  <path className="hiw-wire" d="M60 90 L75 90 L75 45 L100 45" stroke="#EF4444" strokeWidth="1.5" />
+                  <path className="hiw-wire" d="M60 130 L75 130 L75 105 L100 105" stroke="#3B82F6" strokeWidth="1.5" />
+                  <path className="hiw-wire" d="M200 85 L240 75" stroke="#22C55E" strokeWidth="1.5" />
+                  <path className="hiw-wire" d="M200 105 L240 90" stroke="#A855F7" strokeWidth="1.5" />
+                </svg>
+              </div>
+              <span className="hiw-arrow">→</span>
+            </div>
+
+            {/* Step 3: Build — animated checklist */}
+            <div className="hiw-step">
+              <div className="hiw-step-header">
+                <span className="hiw-step-num">3</span>
+                <span className="hiw-step-name">Build</span>
+              </div>
+              <div className="hiw-build-list">
+                <div className="hiw-build-item"><span className="hiw-check">✓</span><span>Upload code to board</span></div>
+                <div className="hiw-build-item"><span className="hiw-check">✓</span><span>Wire components</span></div>
+                <div className="hiw-build-item"><span className="hiw-check">✓</span><span>Order parts from list</span></div>
+                <div className="hiw-build-item"><span className="hiw-check">✓</span><span>Print enclosure & assemble</span></div>
               </div>
             </div>
+          </div>
+
+          {/* Output type cards — horizontal row */}
+          <div className="hiw-outputs">
+            <div className="hiw-output"><span className="hiw-output-icon">plan</span><span className="hiw-output-name">Project plan</span></div>
+            <div className="hiw-output"><span className="hiw-output-icon">.ino</span><span className="hiw-output-name">Source code</span></div>
+            <div className="hiw-output"><span className="hiw-output-icon">svg</span><span className="hiw-output-name">Wiring diagram</span></div>
+            <div className="hiw-output"><span className="hiw-output-icon">.stl</span><span className="hiw-output-name">3D model <span className="hiw-coming">soon</span></span></div>
+            <div className="hiw-output"><span className="hiw-output-icon">.svg</span><span className="hiw-output-name">Laser design <span className="hiw-coming">soon</span></span></div>
           </div>
         </div>
 
